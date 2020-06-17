@@ -12,6 +12,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Crux <crux153@gmail.com>",
+  "license": "MIT",
   "private": true,
   "dependencies": {
     "@aws-sdk/client-s3-node": "0.1.0-preview.2",
