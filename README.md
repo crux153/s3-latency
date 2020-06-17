@@ -2,6 +2,8 @@
 
 Test S3 latency over multiple regions. Test and print average of 10 PUT, GET, DELETE requests of 1KB, 10KB, 1MB, 10MB files.
 
+[![asciicast](https://asciinema.org/a/FG6GU7keMoclniT1ULm441YuW.png)](https://asciinema.org/a/FG6GU7keMoclniT1ULm441YuW)
+
 ## Requirement
 
 Node.js 10 or above.
