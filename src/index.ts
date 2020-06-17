@@ -71,6 +71,11 @@ async function main() {
     await s3.send(
       new CreateBucketCommand({
         Bucket: bucket,
+        ...(region === "us-east-1" && {
+          CreateBucketConfiguration: {
+            LocationConstraint: "us-east-2",
+          },
+        }),
       })
     );
 
