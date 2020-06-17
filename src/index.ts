@@ -10,6 +10,8 @@ import {
 import { v4 as uuid } from "uuid";
 import crypto from "crypto";
 import dotenv from "dotenv";
+import chalk from "chalk";
+import ora from "ora";
 
 dotenv.config();
 
@@ -54,7 +56,7 @@ async function main() {
   const testResult = new Map<string, Map<string, Result>>();
 
   for (const region of REGIONS) {
-    console.log(`[+] Region: ${region}`);
+    const spinner = ora(`Region ${chalk.blue(region)}`).start();
 
     const s3 = new S3Client({
       region,
@@ -75,14 +77,19 @@ async function main() {
     const regionResult = new Map<string, Result>();
 
     for (const test of TESTS) {
-      console.log(`[+] Test: ${test.name}`);
+      spinner.text = `Region ${chalk.blue(region)} Test ${chalk.green(
+        test.name
+      )}`;
 
       const keys: string[] = [];
       const putResults: number[] = [];
       const getResults: number[] = [];
       const deleteResults: number[] = [];
 
-      console.log(`[+] PUT`);
+      spinner.text = `Region ${chalk.blue(region)} Test ${chalk.green(
+        test.name
+      )} ${chalk.cyan("PUT")}`;
+
       for (let run = 0; run < RUN; run++) {
         const buffer = crypto.randomBytes(test.size);
         const key = uuid();
@@ -101,7 +108,10 @@ async function main() {
         putResults.push(latency);
       }
 
-      console.log(`[+] GET`);
+      spinner.text = `Region ${chalk.blue(region)} Test ${chalk.green(
+        test.name
+      )} ${chalk.cyan("GET")}`;
+
       for (let run = 0; run < RUN; run++) {
         const key = keys[run];
 
@@ -117,7 +127,10 @@ async function main() {
         getResults.push(latency);
       }
 
-      console.log(`[+] DELETE`);
+      spinner.text = `Region ${chalk.blue(region)} Test ${chalk.green(
+        test.name
+      )} ${chalk.cyan("DELETE")}`;
+
       for (let run = 0; run < RUN; run++) {
         const key = keys[run];
 
@@ -147,18 +160,26 @@ async function main() {
         Bucket: bucket,
       })
     );
+
+    spinner.succeed(`Region ${chalk.blue(region)}`);
   }
 
-  console.log("\n\n[+] Result");
+  console.log("\n");
 
   for (const test of TESTS) {
-    console.log(`[+] Test: ${test.name}`);
+    console.log(`${chalk.dim(">")} Test ${chalk.green(test.name)}`);
 
     for (const method of ["put", "get", "delete"] as const) {
-      console.log(`[+] ${method.toUpperCase()}`);
+      console.log(`${chalk.dim("-")} ${method.toUpperCase()}`);
+
       for (const region of REGIONS) {
-        const result = testResult.get(region)?.get(test.name)?.put || 0;
-        console.log(`${region}: ${Math.round(result * 1000) / 1000}ms`);
+        const result = testResult.get(region)?.get(test.name)?.[method] || 0;
+
+        console.log(
+          `  ${chalk.dim("-")} ${chalk.blue(region)} ${chalk.green(
+            `${Math.round(result * 1000) / 1000}ms`
+          )}`
+        );
       }
     }
   }
